@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>❤️ Advanced Heart Failure & Stress Assessment Dashboard</title>
+  
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Bricolage Grotesque', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              red: '#ff1744',
+              cyan: '#00e5ff',
+              purple: '#d500f9',
+              darkBg: '#090a10',
+              cardBg: 'rgba(17, 19, 31, 0.65)',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React 18 & ReactDOM 18 UMD (Development Build for debugging) -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  
+  <!-- Babel Standalone to transpile JSX on the fly in browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script>
+    if (typeof Babel !== 'undefined') {
+      Babel.registerPreset('classic-react', {
+        presets: [
+          [Babel.availablePresets['react'], { runtime: 'classic' }]
+        ]
+      });
+    }
+  </script>
+
+  <!-- Custom CSS for React Bits effects -->
+  <style>
+    /* Global Styles */
+    html, body {
+      background-color: #06070d;
+      color: #f8fafc;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Ambient Aurora Backgrounds */
+    .aurora-bg {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      z-index: -10;
+      overflow: hidden;
+      background: radial-gradient(circle at 100% 0%, #0c1020 0%, #06070d 70%);
+    }
+
+    .aurora-glow-1 {
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      width: 60%;
+      height: 60%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.08) 0%, transparent 70%);
+      filter: blur(80px);
+      animation: floatGlow 15s infinite alternate ease-in-out;
+    }
+
+    .aurora-glow-2 {
+      position: absolute;
+      bottom: -10%;
+      right: -10%;
+      width: 60%;
+      height: 60%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 23, 68, 0.08) 0%, transparent 70%);
+      filter: blur(80px);
+      animation: floatGlow 20s infinite alternate-reverse ease-in-out;
+    }
+
+    @keyframes floatGlow {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(8%, 8%) scale(1.15); }
+    }
+
+    /* Spotlight Card Effect (React Bits Spotlight Card) */
+    .spotlight-card {
+      position: relative;
+      background: rgba(15, 17, 28, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      backdrop-filter: blur(16px);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+
+    .spotlight-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(
+        400px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+        rgba(0, 229, 255, 0.08),
+        transparent 40%
+      );
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .spotlight-card:hover::before {
+      opacity: 1;
+    }
+
+    .spotlight-card-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Text Animations (Blur Text) */
+    @keyframes blurIn {
+      from {
+        filter: blur(8px);
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        filter: blur(0);
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-blur-text {
+      animation: blurIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Neon pulse for metrics */
+    @keyframes neonPulse {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.2), inset 0 0 5px rgba(0, 229, 255, 0.1);
+        border-color: rgba(0, 229, 255, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 10px rgba(0, 229, 255, 0.2);
+        border-color: rgba(0, 229, 255, 0.6);
+      }
+    }
+
+    .neon-pulse-cyan {
+      animation: neonPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes neonPulseRed {
+      0%, 100% {
+        box-shadow: 0 0 10px rgba(255, 23, 68, 0.2), inset 0 0 5px rgba(255, 23, 68, 0.1);
+        border-color: rgba(255, 23, 68, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(255, 23, 68, 0.4), inset 0 0 10px rgba(255, 23, 68, 0.2);
+        border-color: rgba(255, 23, 68, 0.6);
+      }
+    }
+
+    .neon-pulse-red {
+      animation: neonPulseRed 2s infinite ease-in-out;
+    }
+
+    /* Audio wave visualization bars */
+    .wave-bar {
+      width: 4px;
+      height: 100%;
+      background-color: #00e5ff;
+      border-radius: 2px;
+      animation: soundPulse 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes soundPulse {
+      0% { transform: scaleY(0.15); }
+      100% { transform: scaleY(1.0); }
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #06070d;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 229, 255, 0.3);
+    }
+
+    /* Print Styles */
+    @media print {
+      body, html {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print, nav, button, footer, #cursor-trail-canvas, .fixed {
+        display: none !important;
+      }
+      .aurora-bg, .aurora-glow-1, .aurora-glow-2 {
+        display: none !important;
+      }
+      .spotlight-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        page-break-inside: avoid;
+        margin-bottom: 1.5rem;
+      }
+      .text-slate-400, .text-slate-300, .text-slate-500, .text-slate-200 {
+        color: #334155 !important;
+      }
+      .text-white {
+        color: #000000 !important;
+      }
+      .bg-slate-900, .bg-slate-950, .bg-slate-900\/60, .bg-cyan-500\/5 {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+      }
+      h1, h2, h3, h4 {
+        color: #0f172a !important;
+        background: none !important;
+        -webkit-text-fill-color: initial !important;
+      }
+      .progress-bar-bg {
+        background-color: #e2e8f0 !important;
+      }
+      .print-border {
+        border: 1px solid #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Interactive Heartbeat Cursor Trail -->
+  <canvas id="cursor-trail-canvas" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 999999;"></canvas>
+
+  <!-- Ambient background elements -->
+  <div class="aurora-bg">
+    <div class="aurora-glow-1"></div>
+    <div class="aurora-glow-2"></div>
+  </div>
+
+  <div id="root">
+    <!-- Visual Loading Screen (Fallback if React doesn't mount) -->
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #06070d; font-family: 'Outfit', sans-serif;">
+      <div style="text-align: center; padding: 2rem; max-width: 450px;">
+        <div style="border: 4px solid rgba(0, 229, 255, 0.1); border-top: 4px solid #00e5ff; border-radius: 50%; width: 48px; height: 48px; margin: 0 auto 1.5rem auto; animation: spin 1s linear infinite;"></div>
+        <h2 style="color: #ffffff; font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem;">Initializing Dashboard...</h2>
+        <p style="color: #94a3b8; font-size: 0.875rem; line-height: 1.5; margin-bottom: 0;">Please wait while the AI models and interface are mounted.</p>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+  <!-- Inline Babel React Code to prevent async loading/fetch races -->
+  <script type="text/babel" data-presets="classic-react">
+    const { useState, useEffect, useRef } = React;
+
+    // --- Subcomponent: SpotlightCard (Inspired by React Bits) ---
+    const SpotlightCard = ({ children, className = "", style = {} }) => {
+      const cardRef = useRef(null);
+      
+      const handleMouseMove = (e) => {
+        if (!cardRef.current) return;
+        const rect = cardRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        cardRef.current.style.setProperty("--mouse-x", `${x}px`);
+        cardRef.current.style.setProperty("--mouse-y", `${y}px`);
+      };
+
+      return (
+        <div 
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          className={`spotlight-card p-6 flex flex-col ${className} antigravity-item`}
+          style={style}
+        >
+          <div className="spotlight-card-content flex flex-col h-full">
+            {children}
+          </div>
+        </div>
+      );
+    };
+
+    // --- Subcomponent: Animated Heartbeat Waveform Visualizer ---
+    const HeartVisualizer = ({ isActive, fileUploaded }) => {
+      const canvasRef = useRef(null);
+
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animationId;
+        let width = canvas.width = canvas.offsetWidth;
+        let height = canvas.height = canvas.offsetHeight;
+        let phase = 0;
+        
+        const render = () => {
+          ctx.clearRect(0, 0, width, height);
+          
+          // Draw background grid lines
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+          ctx.lineWidth = 1;
+          for (let i = 0; i < width; i += 30) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, height);
+            ctx.stroke();
+          }
+          for (let j = 0; j < height; j += 20) {
+            ctx.beginPath();
+            ctx.moveTo(0, j);
+            ctx.lineTo(width, j);
+            ctx.stroke();
+          }
+
+          // Draw active heartbeat line
+          ctx.beginPath();
+          ctx.strokeStyle = isActive ? '#00e5ff' : (fileUploaded ? '#d500f9' : '#ff1744');
+          ctx.lineWidth = 3;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = isActive ? 'rgba(0, 229, 255, 0.5)' : (fileUploaded ? 'rgba(213, 0, 249, 0.3)' : 'rgba(255, 23, 68, 0.3)');
+          
+          for (let x = 0; x < width; x++) {
+            let y = height / 2;
+            
+            if (isActive) {
+              // ECG Waveform math
+              let pos = (x + phase) % 180;
+              if (pos > 50 && pos < 60) {
+                // P wave
+                y -= Math.sin((pos - 50) * Math.PI / 10) * 6;
+              } else if (pos >= 60 && pos < 64) {
+                // Q wave
+                y += (pos - 60) * 3;
+              } else if (pos >= 64 && pos < 70) {
+                // R wave
+                y -= (pos - 64) * 14 - 15;
+              } else if (pos >= 70 && pos < 76) {
+                // S wave
+                y += (pos - 70) * 10 - 15;
+              } else if (pos >= 76 && pos < 95) {
+                // T wave
+                y -= Math.sin((pos - 76) * Math.PI / 19) * 10;
+              }
+            } else if (fileUploaded) {
+              y += Math.sin(x * 0.05 + phase * 0.1) * 3;
+            } else {
+              y += (Math.random() - 0.5) * 1.5;
+            }
+            
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          
+          phase = (phase - 4) % 1000;
+          animationId = requestAnimationFrame(render);
+        };
+        
+        render();
+        
+        const handleResize = () => {
+          if (!canvas) return;
+          width = canvas.width = canvas.offsetWidth;
+          height = canvas.height = canvas.offsetHeight;
+        };
+        window.addEventListener('resize', handleResize);
+        
+        return () => {
+          cancelAnimationFrame(animationId);
+          window.removeEventListener('resize', handleResize);
+        };
+      }, [isActive, fileUploaded]);
+
+      return (
+        <div className="relative w-full">
+          <canvas ref={canvasRef} className="w-full h-28 bg-slate-950/60 rounded-xl border border-white/5" />
+          <div className="absolute top-2 right-3 text-[10px] uppercase font-bold tracking-wider text-white/40 flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-cyan-400 animate-ping' : 'bg-brand-red'}`}></span>
+            {isActive ? 'Simulating Live ECG' : (fileUploaded ? 'Audio Loaded' : 'No Signal')}
+          </div>
+        </div>
+      );
+    };
+
+    // --- Main Application Component ---
+    function App() {
+      // Navigation State
+      const [activeTab, setActiveTab] = useState("dashboard");
+
+      // Sleep & Longevity State
+      const [sleepAge, setSleepAge] = useState(30);
+      const [sleepGender, setSleepGender] = useState("Male");
+      const [sleepHeight, setSleepHeight] = useState(170);
+      const [sleepWeight, setSleepWeight] = useState(70);
+      const [yearsPoorSleep, setYearsPoorSleep] = useState(0);
+      const [bedtime, setBedtime] = useState("22:30");
+      const [wakeupTime, setWakeupTime] = useState("06:30");
+      const [sleepDuration, setSleepDuration] = useState(8);
+      const [sleepQual, setSleepQual] = useState("Good");
+      const [exerciseFreq, setExerciseFreq] = useState(3);
+      const [smoking, setSmoking] = useState("Non-smoker");
+      const [alcohol, setAlcohol] = useState("None");
+      const [workSchedule, setWorkSchedule] = useState("Day Shift");
+      const [screenTime, setScreenTime] = useState(4);
+      const [sleepStress, setSleepStress] = useState(4);
+      const [existingConditions, setExistingConditions] = useState("");
+      const [famHeart, setFamHeart] = useState(false);
+      const [famDiabetes, setFamDiabetes] = useState(false);
+      const [famHypertension, setFamHypertension] = useState(false);
+
+      const [sleepLoading, setSleepLoading] = useState(false);
+      const [sleepResult, setSleepResult] = useState(null);
+
+      // Heart Risk State
+      const [age, setAge] = useState(30);
+      const [heartFile, setHeartFile] = useState(null);
+      const [audioUrl, setAudioUrl] = useState("");
+      const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+      const [heartLoading, setHeartLoading] = useState(false);
+      const [heartResult, setHeartResult] = useState(null);
+
+      // Stress State
+      const [anxietyLevel, setAnxietyLevel] = useState(13);
+      const [mentalHealthHistory, setMentalHealthHistory] = useState(0);
+      const [depression, setDepression] = useState(10);
+      const [headache, setHeadache] = useState(1);
+      const [sleepQuality, setSleepQuality] = useState(5);
+      const [breathingProblem, setBreathingProblem] = useState(2);
+      const [livingConditions, setLivingConditions] = useState(2);
+      const [stressLoading, setStressLoading] = useState(false);
+      const [stressResult, setStressResult] = useState({ stress_class: 0, stress_level: "Low" });
+
+      // Antigravity Easter Egg State
+      const [antigravity, setAntigravity] = useState(false);
+      const physicsElements = useRef([]);
+      const mousePos = useRef({ x: 0, y: 0, px: 0, py: 0, vx: 0, vy: 0, down: false });
+
+      // Auto-predict stress on inputs change
+      useEffect(() => {
+        const predictStress = async () => {
+          setStressLoading(true);
+          try {
+            const res = await fetch("/api/predict/stress", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                anxiety_level: Number(anxietyLevel),
+                mental_health_history: Number(mentalHealthHistory),
+                depression: Number(depression),
+                headache: Number(headache),
+                sleep_quality: Number(sleepQuality),
+                breathing_problem: Number(breathingProblem),
+                living_conditions: Number(livingConditions)
+              })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setStressResult(data);
+            }
+          } catch (err) {
+            console.error("Stress prediction error:", err);
+          } finally {
+            setStressLoading(false);
+          }
+        };
+        
+        const delayDebounceFn = setTimeout(() => {
+          predictStress();
+        }, 400);
+
+        return () => clearTimeout(delayDebounceFn);
+      }, [anxietyLevel, mentalHealthHistory, depression, headache, sleepQuality, breathingProblem, livingConditions]);
+
+      // Audio Playback Watcher
+      const audioRef = useRef(null);
+      const handlePlayToggle = () => {
+        if (!audioRef.current) return;
+        if (isAudioPlaying) {
+          audioRef.current.pause();
+          setIsAudioPlaying(false);
+        } else {
+          audioRef.current.play();
+          setIsAudioPlaying(true);
+        }
+      };
+
+      const handleAudioEnded = () => {
+        setIsAudioPlaying(false);
+      };
+
+      // Heartbeat File Upload & Analyze
+      const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          setHeartFile(file);
+          setAudioUrl(URL.createObjectURL(file));
+          setHeartResult(null);
+        }
+      };
+
+      const analyzeHeartbeat = async () => {
+        if (!heartFile) return;
+        setHeartLoading(true);
+        const formData = new FormData();
+        formData.append("file", heartFile);
+        formData.append("age", age);
+
+        try {
+          const res = await fetch("/api/predict/heart", {
+            method: "POST",
+            body: formData
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setHeartResult(data);
+          } else {
+            alert("Failed to analyze heart sound.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error contacting API.");
+        } finally {
+          setHeartLoading(false);
+        }
+      };
+
+      // Antigravity Engine Loop
+      useEffect(() => {
+        let animId;
+
+        const handleMouseMove = (e) => {
+          mousePos.current.x = e.clientX;
+          mousePos.current.y = e.clientY;
+          mousePos.current.vx = mousePos.current.x - mousePos.current.px;
+          mousePos.current.vy = mousePos.current.y - mousePos.current.py;
+          mousePos.current.px = mousePos.current.x;
+          mousePos.current.py = mousePos.current.y;
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+
+        const updatePhysics = () => {
+          if (antigravity) {
+            physicsElements.current.forEach(item => {
+              // Gravity pull upward (floating)
+              item.vy -= 0.05;
+              // Brownian motion
+              item.vx += (Math.random() - 0.5) * 0.3;
+              item.vy += (Math.random() - 0.5) * 0.3;
+              // Friction
+              item.vx *= 0.98;
+              item.vy *= 0.98;
+
+              // Mouse repulsion
+              const rect = item.dom.getBoundingClientRect();
+              const cx = rect.left + rect.width / 2;
+              const cy = rect.top + rect.height / 2;
+              const dx = cx - mousePos.current.x;
+              const dy = cy - mousePos.current.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              
+              if (dist < 220 && dist > 1) {
+                const force = (220 - dist) * 0.15;
+                item.vx += (dx / dist) * force;
+                item.vy += (dy / dist) * force;
+              }
+
+              item.dx += item.vx;
+              item.dy += item.vy;
+
+              // Wall collision
+              const buffer = 20;
+              if (rect.left + item.vx < buffer) {
+                item.vx = Math.abs(item.vx) * 0.8;
+                item.dx += item.vx;
+              }
+              if (rect.right + item.vx > window.innerWidth - buffer) {
+                item.vx = -Math.abs(item.vx) * 0.8;
+                item.dx += item.vx;
+              }
+              if (rect.top + item.vy < buffer) {
+                item.vy = Math.abs(item.vy) * 0.8;
+                item.dy += item.vy;
+              }
+              if (rect.bottom + item.vy > window.innerHeight - buffer) {
+                item.vy = -Math.abs(item.vy) * 0.8;
+                item.dy += item.vy;
+              }
+
+              item.dom.style.transform = `translate3d(${item.dx}px, ${item.dy}px, 0px)`;
+            });
+          }
+          animId = requestAnimationFrame(updatePhysics);
+        };
+
+        if (antigravity) {
+          // Initialize physics items
+          const domElements = document.querySelectorAll('.antigravity-item');
+          physicsElements.current = Array.from(domElements).map(el => {
+            el.style.willChange = 'transform';
+            el.style.transition = 'none';
+            return {
+              dom: el,
+              dx: 0,
+              dy: 0,
+              vx: (Math.random() - 0.5) * 5,
+              vy: (Math.random() - 0.5) * 5 - 2,
+              width: el.offsetWidth,
+              height: el.offsetHeight
+            };
+          });
+          animId = requestAnimationFrame(updatePhysics);
+        } else {
+          // Reset physics styles
+          physicsElements.current.forEach(item => {
+            item.dom.style.transform = '';
+            item.dom.style.willChange = '';
+            item.dom.style.transition = '';
+          });
+          physicsElements.current = [];
+          cancelAnimationFrame(animId);
+        }
+
+        return () => {
+          window.removeEventListener('mousemove', handleMouseMove);
+          cancelAnimationFrame(animId);
+        };
+      }, [antigravity]);
+
+      // Combined Recommendation Logic
+      const getCombinedRecommendation = () => {
+        let risk = heartResult ? heartResult.heart_failure_risk : 0;
+        let stress = stressResult ? stressResult.stress_class : 0;
+        let sleep = sleepResult ? sleepResult.sleep_health_score : 100;
+        let longevity = sleepResult ? sleepResult.longevity_wellness_score : 100;
+
+        let status = "success";
+        let title = "🟢 Health Metrics Stable";
+        let descriptions = [];
+
+        if (heartResult) {
+          if (risk >= 70) {
+            status = "critical";
+            descriptions.push(`Critical cardiac risk index: ${risk.toFixed(1)}%. Seek immediate medical attention.`);
+          } else if (risk >= 40) {
+            if (status !== "critical") status = "warning";
+            descriptions.push(`Elevated cardiac risk index: ${risk.toFixed(1)}%. Consult a cardiologist.`);
+          } else if (risk >= 20) {
+            if (status !== "critical" && status !== "warning") status = "info";
+            descriptions.push(`Mild murmur/acoustic anomalies detected (Risk: ${risk.toFixed(1)}%).`);
+          }
+        } else {
+          descriptions.push("No cardiac acoustics uploaded. Complete the Heart Failure Assessment module.");
+        }
+
+        if (stress === 2) {
+          if (status !== "critical") status = "warning";
+          descriptions.push("High stress levels detected via lifestyle inputs. Prioritize relaxation and autonomic recovery.");
+        } else if (stress === 1) {
+          if (status === "success") status = "info";
+          descriptions.push("Moderate stress indicators detected.");
+        }
+
+        if (sleepResult) {
+          if (sleepResult.biological_risk_level === "Critical" || sleepResult.biological_risk_level === "High") {
+            status = "critical";
+            descriptions.push(`Sleep & Longevity assessment flags a ${sleepResult.biological_risk_level} biological risk. Sleep health score: ${sleep}/100.`);
+          } else if (sleepResult.biological_risk_level === "Moderate") {
+            if (status !== "critical") status = "warning";
+            descriptions.push(`Moderate biological risk flags. Optimize sleep habits (Score: ${sleep}/100) to protect longevity (Score: ${longevity}/100).`);
+          }
+        }
+
+        if (status === "critical") {
+          title = "⚠️ High Alert: Critical Health Risks Detected";
+        } else if (status === "warning") {
+          title = "🟡 Elevated Health Warning: Action Recommended";
+        } else if (status === "info") {
+          title = "🔵 Moderate Metrics Check: Monitor Progress";
+        } else {
+          descriptions.push("All monitored metrics are within normal baseline ranges. Maintain your healthy routines.");
+        }
+
+        return {
+          alert: status,
+          title: title,
+          desc: descriptions.join(" ")
+        };
+      };
+
+      const analyzeSleepLongevity = async (e) => {
+        if (e) e.preventDefault();
+        setSleepLoading(true);
+        try {
+          const res = await fetch("/api/predict/sleep_longevity", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              age: Number(sleepAge),
+              gender: sleepGender,
+              height: Number(sleepHeight),
+              weight: Number(sleepWeight),
+              years_poor_sleep: Number(yearsPoorSleep),
+              bedtime,
+              wakeup_time: wakeupTime,
+              sleep_duration: Number(sleepDuration),
+              sleep_quality: sleepQual,
+              exercise_frequency: Number(exerciseFreq),
+              smoking_status: smoking,
+              alcohol_consumption: alcohol,
+              work_schedule: workSchedule,
+              screen_time: Number(screenTime),
+              stress_level: Number(sleepStress),
+              existing_conditions: existingConditions,
+              family_heart_disease: famHeart,
+              family_diabetes: famDiabetes,
+              family_hypertension: famHypertension
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setSleepResult(data);
+          } else {
+            alert("Failed to analyze sleep health.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error contacting API.");
+        } finally {
+          setSleepLoading(false);
+        }
+      };
+
+      const downloadJSONReport = () => {
+        if (!sleepResult) return;
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sleepResult, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `sleep_longevity_report_${sleepAge}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+      };
+
+      const recommendation = getCombinedRecommendation();
+
+      return (
+        <div className="min-h-screen px-4 py-8 max-w-7xl mx-auto flex flex-col justify-between">
+          
+          {/* Header Section */}
+          <header className="text-center mb-6 antigravity-item no-print">
+            <h1 className="text-4xl md:text-5xl font-display font-extrabold bg-gradient-to-r from-cyan-400 via-brand-purple to-brand-red bg-clip-text text-transparent drop-shadow-md mb-2 animate-blur-text">
+              ❤️ Multi-System Cardiopulmonary & Longevity Platform
+            </h1>
+            <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto font-light">
+              BiLSTM cardiac wave analysis, stress index modeling, and clinical sleep longevity evaluation tools.
+            </p>
+          </header>
+
+          {/* Glowing Navigation Bar */}
+          <nav className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 bg-slate-900/60 p-2 rounded-2xl border border-white/5 max-w-4xl mx-auto antigravity-item no-print">
+            <button 
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all duration-300 flex items-center gap-2 ${
+                activeTab === 'dashboard'
+                  ? 'bg-gradient-to-r from-cyan-500 to-brand-purple text-white shadow-lg shadow-cyan-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              📊 Dashboard
+            </button>
+            <button 
+              onClick={() => setActiveTab('heart')}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all duration-300 flex items-center gap-2 ${
+                activeTab === 'heart'
+                  ? 'bg-gradient-to-r from-cyan-500 to-brand-purple text-white shadow-lg shadow-cyan-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              ❤️ Heart Failure Assessment
+            </button>
+            <button 
+              onClick={() => setActiveTab('stress')}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all duration-300 flex items-center gap-2 ${
+                activeTab === 'stress'
+                  ? 'bg-gradient-to-r from-cyan-500 to-brand-purple text-white shadow-lg shadow-cyan-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              🧠 Stress Assessment
+            </button>
+            <button 
+              onClick={() => setActiveTab('sleep')}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all duration-300 flex items-center gap-2 ${
+                activeTab === 'sleep'
+                  ? 'bg-gradient-to-r from-cyan-500 to-brand-purple text-white shadow-lg shadow-cyan-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              💤 Sleep & Longevity
+            </button>
+          </nav>
+
+          {/* Tab Contents */}
+          <div className="flex-grow mb-8">
+            
+            {/* 1. DASHBOARD TAB */}
+            {activeTab === 'dashboard' && (
+              <div className="space-y-8 animate-blur-text no-print">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  
+                  {/* Summary Card: Heart failure */}
+                  <SpotlightCard className="border-cyan-500/20 bg-cyan-500/5 hover:border-cyan-500/40">
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400 font-bold text-sm">❤️ Cardiac</span>
+                      <button onClick={() => setActiveTab('heart')} className="text-[10px] uppercase font-bold text-cyan-400 hover:underline">Open Tool →</button>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-2">Cardiac Acoustics</h3>
+                    <p className="text-xs text-slate-400 mb-4 flex-grow">Classifying acoustic rhythm patterns via neural BiLSTM mfcc sequences.</p>
+                    <div className="mt-auto bg-slate-950/60 p-3 rounded-lg border border-white/5">
+                      <span className="text-[9px] uppercase tracking-wider text-slate-500 block font-bold">Status</span>
+                      <span className="text-xs font-semibold text-white">
+                        {heartResult 
+                          ? `Risk Index: ${heartResult.heart_failure_risk.toFixed(1)}% (${heartResult.status === 'success' ? 'Stable' : heartResult.status.toUpperCase()})` 
+                          : 'Awaiting Waveform Upload'}
+                      </span>
+                    </div>
+                  </SpotlightCard>
+
+                  {/* Summary Card: Stress */}
+                  <SpotlightCard className="border-brand-red/20 bg-brand-red/5 hover:border-brand-red/40">
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="p-2 bg-brand-red/10 rounded-lg text-brand-red font-bold text-sm">🧠 Stress</span>
+                      <button onClick={() => setActiveTab('stress')} className="text-[10px] uppercase font-bold text-brand-red hover:underline">Open Tool →</button>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-2">Stress Assessment</h3>
+                    <p className="text-xs text-slate-400 mb-4 flex-grow">Evaluating emotional and fatigue thresholds using a Random Forest Classifier.</p>
+                    <div className="mt-auto bg-slate-950/60 p-3 rounded-lg border border-white/5">
+                      <span className="text-[9px] uppercase tracking-wider text-slate-500 block font-bold">Status (Realtime)</span>
+                      <span className="text-xs font-semibold text-white">
+                        Stress Level: {stressLoading ? 'Calculating...' : `${stressResult.stress_level} (Class ${stressResult.stress_class})`}
+                      </span>
+                    </div>
+                  </SpotlightCard>
+
+                  {/* Summary Card: Sleep & Longevity */}
+                  <SpotlightCard className="border-brand-purple/20 bg-brand-purple/5 hover:border-brand-purple/40">
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="p-2 bg-brand-purple/10 rounded-lg text-brand-purple font-bold text-sm">💤 Sleep & Longevity</span>
+                      <button onClick={() => setActiveTab('sleep')} className="text-[10px] uppercase font-bold text-brand-purple hover:underline">Open Tool →</button>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-2">Sleep Longevity</h3>
+                    <p className="text-xs text-slate-400 mb-4 flex-grow">Assessing biological age progression risk, sleep quality, and longevity coefficients.</p>
+                    <div className="mt-auto bg-slate-950/60 p-3 rounded-lg border border-white/5">
+                      <span className="text-[9px] uppercase tracking-wider text-slate-500 block font-bold">Status</span>
+                      <span className="text-xs font-semibold text-white">
+                        {sleepResult 
+                          ? `Sleep: ${sleepResult.sleep_health_score}/100 | Longevity: ${sleepResult.longevity_wellness_score}/100` 
+                          : 'Awaiting Questionnaire'}
+                      </span>
+                    </div>
+                  </SpotlightCard>
+
+                </div>
+
+                {/* Combined Recommendation Bar (Placed prominently in Dashboard) */}
+                <section className="antigravity-item">
+                  <SpotlightCard className={`p-6 md:p-8 border ${
+                    recommendation.alert === 'critical' ? 'border-brand-red/40 bg-brand-red/5' :
+                    recommendation.alert === 'warning' ? 'border-yellow-500/30 bg-yellow-500/5' :
+                    recommendation.alert === 'info' ? 'border-cyan-500/20 bg-cyan-500/5' :
+                    'border-green-500/20 bg-green-500/5'
+                  }`}>
+                    <div className="flex flex-col md:flex-row gap-5 items-start md:items-center justify-between">
+                      <div className="flex gap-4 items-center">
+                        <span className={`p-3 rounded-full ${
+                          recommendation.alert === 'critical' ? 'bg-brand-red/10 text-brand-red' :
+                          recommendation.alert === 'warning' ? 'bg-yellow-500/10 text-yellow-400' :
+                          recommendation.alert === 'info' ? 'bg-cyan-500/10 text-cyan-400' :
+                          'bg-green-500/10 text-green-400'
+                        }`}>
+                          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        </span>
+                        <div>
+                          <h3 className="text-lg font-bold font-display text-white mt-0 !border-l-0 !pl-0">{recommendation.title}</h3>
+                          <p className="text-slate-300 text-sm mt-1 leading-relaxed max-w-4xl">
+                            {recommendation.desc}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </SpotlightCard>
+                </section>
+              </div>
+            )}
+
+            {/* 2. HEART FAILURE ASSESSMENT TAB */}
+            {activeTab === 'heart' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start animate-blur-text no-print">
+                <div className="space-y-6 lg:col-span-2">
+                  <SpotlightCard className="neon-pulse-cyan">
+                    <div className="flex items-center gap-3 border-b border-white/5 pb-4 mb-6">
+                      <span className="p-2.5 rounded-lg bg-cyan-500/10 text-cyan-400">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                      </span>
+                      <div>
+                        <h2 className="text-xl font-bold font-display text-white">Cardiac Acoustics Analysis</h2>
+                        <p className="text-xs text-slate-400">Powered by Bidirectional LSTM Model</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      {/* Age Input */}
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                            <span>👤 Patient Age</span>
+                          </label>
+                          <span className="text-sm font-bold text-cyan-400">{age} years</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="1" 
+                          max="120" 
+                          value={age} 
+                          onChange={(e) => setAge(Number(e.target.value))}
+                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                        />
+                      </div>
+
+                      {/* Audio Upload */}
+                      <div className="border border-dashed border-cyan-500/20 bg-cyan-500/5 hover:border-cyan-500/40 rounded-xl p-6 transition-all">
+                        <input 
+                          type="file" 
+                          accept=".wav" 
+                          id="audio-file-input" 
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                        <label htmlFor="audio-file-input" className="flex flex-col items-center justify-center cursor-pointer text-center">
+                          <svg className="w-10 h-10 text-cyan-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                          {heartFile ? (
+                            <div>
+                              <p className="text-sm font-semibold text-white truncate max-w-xs">{heartFile.name}</p>
+                              <p className="text-xs text-slate-400 mt-1">Click to replace file</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p className="text-sm font-semibold text-white">Upload Heartbeat WAV File</p>
+                              <p className="text-xs text-slate-400 mt-1">WAV format required (22050Hz baseline)</p>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+
+                      {/* Audio Playback Controls */}
+                      {audioUrl && (
+                        <div className="flex items-center justify-between bg-slate-900/60 p-4 rounded-xl border border-white/5">
+                          <div className="flex items-center gap-3">
+                            <button 
+                              onClick={handlePlayToggle}
+                              className="p-2.5 rounded-full bg-cyan-400 text-slate-950 hover:scale-105 transition-transform"
+                            >
+                              {isAudioPlaying ? (
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                              ) : (
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                              )}
+                            </button>
+                            <div>
+                              <span className="text-xs uppercase tracking-wider text-slate-400 block font-bold">Audio Player</span>
+                              <span className="text-xs text-slate-500 font-mono">Status: {isAudioPlaying ? 'Playing' : 'Paused'}</span>
+                            </div>
+                          </div>
+                          <audio ref={audioRef} src={audioUrl} onEnded={handleAudioEnded} className="hidden" />
+                        </div>
+                      )}
+
+                      {/* Wave Visualizer */}
+                      <HeartVisualizer isActive={isAudioPlaying} fileUploaded={!!audioUrl} />
+
+                      {/* Action Button */}
+                      <button 
+                        onClick={analyzeHeartbeat}
+                        disabled={!heartFile || heartLoading}
+                        className="w-full bg-gradient-to-r from-cyan-400 to-brand-purple hover:scale-[1.01] transition-transform text-white font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:pointer-events-none"
+                      >
+                        {heartLoading ? (
+                          <span className="flex items-center gap-2">
+                            <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            Analyzing Waveforms...
+                          </span>
+                        ) : (
+                          <span>📊 Run Cardiac Analysis</span>
+                        )}
+                      </button>
+                    </div>
+                  </SpotlightCard>
+                </div>
+
+                <div className="space-y-6">
+                  {heartResult ? (
+                    <div className="space-y-6">
+                      <SpotlightCard>
+                        <h3 className="text-base font-bold text-white border-b border-white/5 pb-2 mb-4">Signal Classifications</h3>
+                        <div className="space-y-4">
+                          <div>
+                            <div className="flex justify-between text-xs font-semibold text-slate-400 mb-1">
+                              <span>✅ Normal Rhythm</span>
+                              <span className="text-cyan-400 font-mono">{heartResult.normal_probability.toFixed(2)}%</span>
+                            </div>
+                            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                              <div className="bg-cyan-400 h-full rounded-full transition-all duration-1000" style={{ width: `${heartResult.normal_probability}%` }}></div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-xs font-semibold text-slate-400 mb-1">
+                              <span>🔊 Murmur Detection</span>
+                              <span className="text-brand-purple font-mono">{heartResult.murmur_probability.toFixed(2)}%</span>
+                            </div>
+                            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                              <div className="bg-brand-purple h-full rounded-full transition-all duration-1000" style={{ width: `${heartResult.murmur_probability}%` }}></div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-xs font-semibold text-slate-400 mb-1">
+                              <span>🎛️ Acoustic Artifact</span>
+                              <span className="text-slate-500 font-mono">{heartResult.artifact_probability.toFixed(2)}%</span>
+                            </div>
+                            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                              <div className="bg-slate-500 h-full rounded-full transition-all duration-1000" style={{ width: `${heartResult.artifact_probability}%` }}></div>
+                            </div>
+                          </div>
+                        </div>
+                      </SpotlightCard>
+
+                      <SpotlightCard className={heartResult.status === 'critical' ? 'border-brand-red/30 bg-brand-red/5' : 'border-cyan-500/20 bg-cyan-500/5'}>
+                        <h3 className="text-base font-bold text-white border-b border-white/5 pb-2 mb-4">Risk Evaluation</h3>
+                        <div className="flex flex-col justify-center items-center h-full py-2">
+                          <div className="text-4xl md:text-5xl font-extrabold font-mono text-white mb-2">
+                            {heartResult.heart_failure_risk.toFixed(1)}%
+                          </div>
+                          <span className="text-xs uppercase tracking-wider text-slate-400 font-bold mb-3">Calculated Risk Index</span>
+                          <div className={`px-4 py-1.5 rounded-full text-xs font-bold text-center ${
+                            heartResult.status === 'critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                            heartResult.status === 'warning' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                            heartResult.status === 'info' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                            'bg-green-500/20 text-green-400 border border-green-500/30'
+                          }`}>
+                            {heartResult.message}
+                          </div>
+                        </div>
+                      </SpotlightCard>
+                    </div>
+                  ) : (
+                    <SpotlightCard className="flex items-center justify-center text-center p-8 h-48 border border-dashed border-white/10">
+                      <p className="text-slate-400 text-sm">Upload and analyze a cardiac audio file to display LSTM classification results.</p>
+                    </SpotlightCard>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 3. STRESS ASSESSMENT TAB */}
+            {activeTab === 'stress' && (
+              <div className="max-w-3xl mx-auto animate-blur-text no-print">
+                <SpotlightCard className="neon-pulse-red">
+                  <div className="flex items-center gap-3 border-b border-white/5 pb-4 mb-6">
+                    <span className="p-2.5 rounded-lg bg-brand-red/10 text-brand-red">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </span>
+                    <div>
+                      <h2 className="text-xl font-bold font-display text-white">Stress Level Assessment</h2>
+                      <p className="text-xs text-slate-400">Random Forest Classifier (Realtime)</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-5">
+                    {/* Anxiety Level */}
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-300">Anxiety Level</span>
+                        <span className="text-brand-red font-semibold font-mono">{anxietyLevel}</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="100" value={anxietyLevel} 
+                        onChange={(e) => setAnxietyLevel(Number(e.target.value))}
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-red"
+                      />
+                    </div>
+
+                    {/* Depression */}
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-300">Depression Index</span>
+                        <span className="text-brand-red font-semibold font-mono">{depression}</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="100" value={depression} 
+                        onChange={(e) => setDepression(Number(e.target.value))}
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-red"
+                      />
+                    </div>
+
+                    {/* Headache frequency */}
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-300">Headache Frequency</span>
+                        <span className="text-brand-red font-semibold font-mono">{headache}</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="100" value={headache} 
+                        onChange={(e) => setHeadache(Number(e.target.value))}
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-red"
+                      />
+                    </div>
+
+                    {/* Sleep Quality */}
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-300">Sleep Quality (0-10)</span>
+                        <span className="text-brand-purple font-semibold font-mono">{sleepQuality}</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="10" value={sleepQuality} 
+                        onChange={(e) => setSleepQuality(Number(e.target.value))}
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-purple"
+                      />
+                    </div>
+
+                    {/* Breathing Problem */}
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-300">Breathing Problems (0-10)</span>
+                        <span className="text-brand-purple font-semibold font-mono">{breathingProblem}</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="10" value={breathingProblem} 
+                        onChange={(e) => setBreathingProblem(Number(e.target.value))}
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-purple"
+                      />
+                    </div>
+
+                    {/* Living Conditions */}
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-300">Living Conditions (0-10)</span>
+                        <span className="text-brand-purple font-semibold font-mono">{livingConditions}</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="10" value={livingConditions} 
+                        onChange={(e) => setLivingConditions(Number(e.target.value))}
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-purple"
+                      />
+                    </div>
+
+                    {/* Mental Health History Select */}
+                    <div>
+                      <label className="block text-xs text-slate-300 mb-1.5">Mental Health History?</label>
+                      <select 
+                        value={mentalHealthHistory}
+                        onChange={(e) => setMentalHealthHistory(Number(e.target.value))}
+                        className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-brand-red/50 transition-colors"
+                      >
+                        <option value={0}>No</option>
+                        <option value={1}>Yes</option>
+                      </select>
+                    </div>
+
+                    {/* Output Banner */}
+                    <div className="bg-slate-900/60 p-4 rounded-xl border border-white/5 flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Stress Level State</span>
+                        <span className="text-base font-bold text-white font-display">
+                          {stressLoading ? 'Evaluating...' : `${stressResult.stress_level} Stress`}
+                        </span>
+                      </div>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                        stressResult.stress_class === 2 ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                        stressResult.stress_class === 1 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                        'bg-green-500/20 text-green-400 border border-green-500/30'
+                      }`}>
+                        {stressResult.stress_class}
+                      </div>
+                    </div>
+                  </div>
+                </SpotlightCard>
+              </div>
+            )}
+
+            {/* 4. SLEEP HEALTH & LONGEVITY ASSESSMENT TAB */}
+            {activeTab === 'sleep' && (
+              <div className="space-y-8 animate-blur-text">
+                
+                {/* Inputs Section */}
+                <form onSubmit={analyzeSleepLongevity} className="grid grid-cols-1 lg:grid-cols-2 gap-8 no-print">
+                  
+                  {/* Left Column: Personal and Sleep Information */}
+                  <SpotlightCard className="border-brand-purple/20 bg-brand-purple/5">
+                    <h3 className="text-lg font-bold text-white mb-6 border-b border-white/5 pb-2 flex items-center gap-2">
+                      <span>👤</span> Personal & Sleep Metrics
+                    </h3>
+                    
+                    <div className="space-y-5">
+                      {/* Age Input */}
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-xs text-slate-300 font-medium">Age</label>
+                          <span className="text-xs font-bold text-cyan-400 font-mono">{sleepAge} years</span>
+                        </div>
+                        <input 
+                          type="range" min="1" max="120" value={sleepAge} 
+                          onChange={(e) => setSleepAge(Number(e.target.value))}
+                          className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                        />
+                      </div>
+
+                      {/* Gender Dropdown */}
+                      <div>
+                        <label className="block text-xs text-slate-300 mb-1.5">Gender</label>
+                        <select 
+                          value={sleepGender} 
+                          onChange={(e) => setSleepGender(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50"
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+
+                      {/* Height & Weight grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-300 mb-1.5">Height (cm)</label>
+                          <input 
+                            type="number" min="50" max="250" value={sleepHeight}
+                            onChange={(e) => setSleepHeight(Number(e.target.value))}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50 font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-300 mb-1.5">Weight (kg)</label>
+                          <input 
+                            type="number" min="20" max="300" value={sleepWeight}
+                            onChange={(e) => setSleepWeight(Number(e.target.value))}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50 font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Sleep Duration Slider */}
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-xs text-slate-300 font-medium">Average Sleep Duration per Night</label>
+                          <span className="text-xs font-bold text-brand-purple font-mono">{sleepDuration} hours</span>
+                        </div>
+                        <input 
+                          type="range" min="3" max="14" step="0.5" value={sleepDuration} 
+                          onChange={(e) => setSleepDuration(Number(e.target.value))}
+                          className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-purple"
+                        />
+                      </div>
+
+                      {/* Bedtime & Wakeup times */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-300 mb-1.5">Average Bedtime</label>
+                          <input 
+                            type="time" value={bedtime}
+                            onChange={(e) => setBedtime(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50 font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-300 mb-1.5">Average Wake-up Time</label>
+                          <input 
+                            type="time" value={wakeupTime}
+                            onChange={(e) => setWakeupTime(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50 font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Sleep Quality */}
+                      <div>
+                        <label className="block text-xs text-slate-300 mb-1.5">Self-Reported Sleep Quality</label>
+                        <select 
+                          value={sleepQual} 
+                          onChange={(e) => setSleepQual(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50"
+                        >
+                          <option value="Poor">Poor</option>
+                          <option value="Average">Average</option>
+                          <option value="Good">Good</option>
+                          <option value="Excellent">Excellent</option>
+                        </select>
+                      </div>
+
+                      {/* Years of poor sleep */}
+                      <div>
+                        <label className="block text-xs text-slate-300 mb-1.5">How many years have you suffered from poor sleep?</label>
+                        <input 
+                          type="number" min="0" max="50" step="0.5" value={yearsPoorSleep}
+                          onChange={(e) => setYearsPoorSleep(Number(e.target.value))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50 font-mono"
+                        />
+                      </div>
+                    </div>
+                  </SpotlightCard>
+
+                  {/* Right Column: Lifestyle and Medical Information */}
+                  <SpotlightCard className="border-brand-purple/20 bg-brand-purple/5">
+                    <h3 className="text-lg font-bold text-white mb-6 border-b border-white/5 pb-2 flex items-center gap-2">
+                      <span>⚙️</span> Lifestyle & Medical Info
+                    </h3>
+
+                    <div className="space-y-5">
+                      {/* Exercise frequency */}
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-xs text-slate-300 font-medium">Exercise Frequency (days/week)</label>
+                          <span className="text-xs font-bold text-cyan-400 font-mono">{exerciseFreq} times</span>
+                        </div>
+                        <input 
+                          type="range" min="0" max="7" value={exerciseFreq} 
+                          onChange={(e) => setExerciseFreq(Number(e.target.value))}
+                          className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                        />
+                      </div>
+
+                      {/* Smoking & Alcohol */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-300 mb-1.5">Smoking Status</label>
+                          <select 
+                            value={smoking} 
+                            onChange={(e) => setSmoking(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50"
+                          >
+                            <option value="Non-smoker">Non-smoker</option>
+                            <option value="Former smoker">Former smoker</option>
+                            <option value="Light smoker">Light smoker</option>
+                            <option value="Heavy smoker">Heavy smoker</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-300 mb-1.5">Alcohol Intake</label>
+                          <select 
+                            value={alcohol} 
+                            onChange={(e) => setAlcohol(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50"
+                          >
+                            <option value="None">None</option>
+                            <option value="Occasional">Occasional</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Heavy">Heavy</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Work Schedule */}
+                      <div>
+                        <label className="block text-xs text-slate-300 mb-1.5">Work Schedule</label>
+                        <select 
+                          value={workSchedule} 
+                          onChange={(e) => setWorkSchedule(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50"
+                        >
+                          <option value="Day Shift">Day Shift</option>
+                          <option value="Night Shift">Night Shift</option>
+                          <option value="Rotating Shift">Rotating Shift</option>
+                        </select>
+                      </div>
+
+                      {/* Screen Time & Stress sliders */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="flex justify-between items-center mb-1">
+                            <label className="text-xs text-slate-300 font-medium">Screen Time</label>
+                            <span className="text-xs font-bold text-brand-purple font-mono">{screenTime}h/day</span>
+                          </div>
+                          <input 
+                            type="range" min="0" max="24" value={screenTime} 
+                            onChange={(e) => setScreenTime(Number(e.target.value))}
+                            className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-purple"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1">
+                            <label className="text-xs text-slate-300 font-medium">Stress Level</label>
+                            <span className="text-xs font-bold text-brand-red font-mono">{sleepStress}/10</span>
+                          </div>
+                          <input 
+                            type="range" min="0" max="10" value={sleepStress} 
+                            onChange={(e) => setSleepStress(Number(e.target.value))}
+                            className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-red"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Existing Medical Conditions */}
+                      <div>
+                        <label className="block text-xs text-slate-300 mb-1">Existing Medical Conditions</label>
+                        <input 
+                          type="text" value={existingConditions}
+                          onChange={(e) => setExistingConditions(e.target.value)}
+                          placeholder="e.g. Asthma, Sleep Apnea (separate with commas)"
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-white/10 text-white text-xs outline-none focus:border-cyan-400/50"
+                        />
+                      </div>
+
+                      {/* Family History Checklist */}
+                      <div>
+                        <label className="block text-xs text-slate-300 mb-2">Family Medical History</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          <label className="flex items-center gap-2 p-2 bg-slate-900/60 rounded-lg border border-white/5 cursor-pointer hover:border-cyan-400/20">
+                            <input 
+                              type="checkbox" checked={famHeart}
+                              onChange={(e) => setFamHeart(e.target.checked)}
+                              className="accent-cyan-400 h-3 w-3"
+                            />
+                            <span className="text-[10px] text-slate-300">Heart Disease</span>
+                          </label>
+                          <label className="flex items-center gap-2 p-2 bg-slate-900/60 rounded-lg border border-white/5 cursor-pointer hover:border-cyan-400/20">
+                            <input 
+                              type="checkbox" checked={famDiabetes}
+                              onChange={(e) => setFamDiabetes(e.target.checked)}
+                              className="accent-cyan-400 h-3 w-3"
+                            />
+                            <span className="text-[10px] text-slate-300">Diabetes</span>
+                          </label>
+                          <label className="flex items-center gap-2 p-2 bg-slate-900/60 rounded-lg border border-white/5 cursor-pointer hover:border-cyan-400/20">
+                            <input 
+                              type="checkbox" checked={famHypertension}
+                              onChange={(e) => setFamHypertension(e.target.checked)}
+                              className="accent-cyan-400 h-3 w-3"
+                            />
+                            <span className="text-[10px] text-slate-300">Hypertension</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <button 
+                        type="submit" 
+                        disabled={sleepLoading}
+                        className="w-full bg-gradient-to-r from-brand-purple to-cyan-400 hover:scale-[1.01] transition-transform text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+                      >
+                        {sleepLoading ? (
+                          <span className="flex items-center gap-2">
+                            <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            Computing Sleep Analytics...
+                          </span>
+                        ) : (
+                          <span>💤 Submit Sleep Longevity Assessment</span>
+                        )}
+                      </button>
+                    </div>
+                  </SpotlightCard>
+                </form>
+
+                {/* Outputs Section */}
+                {sleepResult && (
+                  <div className="space-y-8 print-border p-4 rounded-3xl">
+                    
+                    {/* Toolbar / Export features */}
+                    <div className="flex flex-wrap justify-between items-center bg-slate-900/60 p-4 rounded-xl border border-white/5 no-print gap-3">
+                      <div>
+                        <h4 className="text-sm font-bold text-white">Assessment Reports</h4>
+                        <p className="text-[10px] text-slate-400">Generated successfully for Patient {sleepAge} yrs</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => window.print()}
+                          className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs rounded-lg transition-transform flex items-center gap-1.5"
+                        >
+                          📥 Download PDF
+                        </button>
+                        <button 
+                          onClick={downloadJSONReport}
+                          className="px-4 py-2 bg-brand-purple hover:bg-brand-purple/80 text-white font-bold text-xs rounded-lg transition-transform flex items-center gap-1.5"
+                        >
+                          📦 Download JSON
+                        </button>
+                        <button 
+                          onClick={() => window.print()}
+                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 font-bold text-xs rounded-lg transition-transform flex items-center gap-1.5"
+                        >
+                          🖨️ Print Report
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Scores Overview Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      
+                      {/* Sleep Health Score */}
+                      <SpotlightCard className="text-center flex justify-center items-center py-6">
+                        <span className="text-xs uppercase tracking-wider text-slate-400 font-bold mb-2">Sleep Health Score</span>
+                        <div className="text-5xl font-extrabold font-mono text-cyan-400 mb-2">
+                          {sleepResult.sleep_health_score}<span className="text-base text-slate-500 font-normal">/100</span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden max-w-[120px] mx-auto">
+                          <div className="bg-cyan-400 h-full" style={{ width: `${sleepResult.sleep_health_score}%` }}></div>
+                        </div>
+                        <span className="text-[10px] text-slate-500 mt-2 block">Quality, consistency, and debt evaluation</span>
+                      </SpotlightCard>
+
+                      {/* Longevity Score */}
+                      <SpotlightCard className="text-center flex justify-center items-center py-6">
+                        <span className="text-xs uppercase tracking-wider text-slate-400 font-bold mb-2">Longevity Score</span>
+                        <div className="text-5xl font-extrabold font-mono text-brand-purple mb-2">
+                          {sleepResult.longevity_wellness_score}<span className="text-base text-slate-500 font-normal">/100</span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden max-w-[120px] mx-auto">
+                          <div className="bg-brand-purple h-full" style={{ width: `${sleepResult.longevity_wellness_score}%` }}></div>
+                        </div>
+                        <span className="text-[10px] text-slate-500 mt-2 block">Biomarker degradation risk scale</span>
+                      </SpotlightCard>
+
+                      {/* Biological Risk Level */}
+                      <SpotlightCard className="text-center flex justify-center items-center py-6">
+                        <span className="text-xs uppercase tracking-wider text-slate-400 font-bold mb-2">Biological Risk Level</span>
+                        <div className={`text-3xl font-black mb-3 mt-1 uppercase tracking-wide py-1.5 px-6 rounded-full inline-block ${
+                          sleepResult.biological_risk_level === 'Critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.2)]' :
+                          sleepResult.biological_risk_level === 'High' ? 'bg-pink-500/20 text-pink-400 border border-pink-500/30' :
+                          sleepResult.biological_risk_level === 'Moderate' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                          'bg-green-500/20 text-green-400 border border-green-500/30'
+                        }`}>
+                          {sleepResult.biological_risk_level}
+                        </div>
+                        <span className="text-[10px] text-slate-400 mt-2 block max-w-xs">{sleepResult.sleep_deprivation_severity}</span>
+                      </SpotlightCard>
+
+                      {/* BMI card */}
+                      <SpotlightCard className="text-center flex justify-center items-center py-6">
+                        <span className="text-xs uppercase tracking-wider text-slate-400 font-bold mb-2">Calculated BMI</span>
+                        <div className="text-4xl font-extrabold font-mono text-white mb-2">
+                          {sleepResult.bmi}
+                        </div>
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Category</span>
+                        <div className="px-3 py-1 bg-slate-900 border border-white/5 rounded-full text-xs text-cyan-300 font-bold inline-block">
+                          {sleepResult.bmi_category}
+                        </div>
+                      </SpotlightCard>
+
+                    </div>
+
+                    {/* Health Risk Predictions */}
+                    <SpotlightCard>
+                      <h3 className="text-base font-bold text-white mb-6 border-b border-white/5 pb-2">Health Risk Probabilities</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {Object.entries(sleepResult.health_risks).map(([riskName, probability]) => {
+                          let badgeColor = "bg-green-500/20 text-green-400 border-green-500/30";
+                          let barColor = "bg-green-400";
+                          if (probability >= 60) {
+                            badgeColor = "bg-red-500/20 text-red-400 border-red-500/30";
+                            barColor = "bg-brand-red";
+                          } else if (probability >= 30) {
+                            badgeColor = "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+                            barColor = "bg-yellow-400";
+                          }
+                          
+                          return (
+                            <div key={riskName} className="space-y-1 bg-slate-950/40 p-4 rounded-xl border border-white/5">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-xs font-semibold text-slate-200">{riskName}</span>
+                                <span className={`text-[9px] uppercase px-2 py-0.5 rounded-full border font-bold font-mono ${badgeColor}`}>
+                                  {probability}%
+                                </span>
+                              </div>
+                              <div className="w-full bg-slate-800/80 h-1.5 rounded-full overflow-hidden progress-bar-bg">
+                                <div className={`h-full rounded-full transition-all duration-1000 ${barColor}`} style={{ width: `${probability}%` }}></div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </SpotlightCard>
+
+                    {/* Longevity assessment card */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      
+                      <SpotlightCard className="border-brand-purple/20 bg-brand-purple/5">
+                        <h4 className="text-sm font-bold text-white mb-3">Estimated Longevity Wellness</h4>
+                        <div className="space-y-4 text-slate-300 text-sm">
+                          <div>
+                            <span className="text-xs text-slate-400 uppercase tracking-wider block font-bold">Health Span Category</span>
+                            <span className="text-base font-bold text-cyan-300 font-display">{sleepResult.longevity_details.health_span_category}</span>
+                          </div>
+                          <div>
+                            <span className="text-xs text-slate-400 uppercase tracking-wider block font-bold">Overall Wellness Rating</span>
+                            <span className="text-lg font-black text-white font-mono">{sleepResult.longevity_details.overall_wellness_rating}</span>
+                          </div>
+                          <div>
+                            <span className="text-xs text-slate-400 uppercase tracking-wider block font-bold">Expected Sleep Impact</span>
+                            <p className="text-xs text-slate-300 leading-relaxed mt-1">{sleepResult.longevity_details.expected_impact}</p>
+                          </div>
+                        </div>
+                      </SpotlightCard>
+
+                      <SpotlightCard className="border-brand-purple/20 bg-brand-purple/5">
+                        <h4 className="text-sm font-bold text-white mb-3">Future Risk Trends</h4>
+                        <div className="space-y-4 text-slate-300 text-xs leading-relaxed">
+                          <p>{sleepResult.longevity_details.future_risk_trends}</p>
+                          <div className="bg-slate-900/60 p-4 rounded-xl border border-white/5 space-y-2">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Longevity Educational Disclaimer</span>
+                            <p className="text-[10px] text-slate-500 leading-normal">
+                              This evaluation represents an educational risk profiling tool based on public epidemiological models, 
+                              and does not claim to know the user's exact lifespan or year of death. Health outcomes are subject to complex genetic, 
+                              environmental, and physiological variables. Consult with a qualified medical professional for health management.
+                            </p>
+                          </div>
+                        </div>
+                      </SpotlightCard>
+
+                    </div>
+
+                    {/* AI report detailed sections */}
+                    <SpotlightCard className="bg-slate-900/60 border border-white/10 shadow-[0_0_20px_rgba(213,0,249,0.05)]">
+                      <div className="border-b border-white/5 pb-4 mb-6 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <span className="p-2 bg-brand-purple/15 text-brand-purple rounded-lg font-bold text-sm">🤖 AI</span>
+                          <div>
+                            <h3 className="text-lg font-bold text-white">Full Clinical AI Report</h3>
+                            <p className="text-xs text-slate-400">Personalized sleep-hygiene analysis and daily recommendations</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6 text-sm text-slate-300 leading-relaxed">
+                        
+                        {/* Sleep analysis */}
+                        <div>
+                          <h4 className="font-bold text-white mb-1.5 text-xs uppercase tracking-wider text-cyan-400">1. Sleep Analysis</h4>
+                          <p>{sleepResult.ai_report.sleep_analysis}</p>
+                        </div>
+
+                        {/* Lifestyle analysis */}
+                        <div>
+                          <h4 className="font-bold text-white mb-1.5 text-xs uppercase tracking-wider text-cyan-400">2. Lifestyle Analysis</h4>
+                          <p>{sleepResult.ai_report.lifestyle_analysis}</p>
+                        </div>
+
+                        {/* Health Risk Analysis */}
+                        <div>
+                          <h4 className="font-bold text-white mb-1.5 text-xs uppercase tracking-wider text-cyan-400">3. Health Risk Analysis</h4>
+                          <p>{sleepResult.ai_report.health_risk_analysis}</p>
+                        </div>
+
+                        {/* Future concerns */}
+                        <div>
+                          <h4 className="font-bold text-white mb-1.5 text-xs uppercase tracking-wider text-cyan-400">4. Future Concerns</h4>
+                          <p>{sleepResult.ai_report.future_concerns}</p>
+                        </div>
+
+                        {/* Recommended Improvements */}
+                        <div>
+                          <h4 className="font-bold text-white mb-2 text-xs uppercase tracking-wider text-cyan-400">5. Recommended Improvements</h4>
+                          <ul className="space-y-1.5">
+                            {sleepResult.ai_report.recommended_improvements.map((improvement, index) => (
+                              <li key={index} className="flex gap-2 items-start text-xs text-slate-300">
+                                <span className="text-cyan-400 font-bold mt-0.5">✔</span>
+                                <span>{improvement}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Personalized recommendations */}
+                        <div>
+                          <h4 className="font-bold text-white mb-1.5 text-xs uppercase tracking-wider text-cyan-400">6. Personalized Sleep recommendations</h4>
+                          <p>{sleepResult.ai_report.personalized_sleep_recommendations}</p>
+                        </div>
+
+                        {/* Suggested daily routine */}
+                        <div>
+                          <h4 className="font-bold text-white mb-3 text-xs uppercase tracking-wider text-cyan-400">7. Suggested Daily Routine</h4>
+                          <div className="border-l border-brand-purple/20 pl-4 ml-2 space-y-3">
+                            {sleepResult.ai_report.suggested_daily_routine.map((step, index) => {
+                              const [time, description] = step.split(" - ");
+                              return (
+                                <div key={index} className="relative">
+                                  <div className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-brand-purple shadow-lg shadow-brand-purple/50"></div>
+                                  <span className="text-xs font-bold text-white font-mono block">{time}</span>
+                                  <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                      </div>
+                    </SpotlightCard>
+
+                  </div>
+                )}
+
+              </div>
+            )}
+
+          </div>
+
+          {/* Model Specifications Footer Info */}
+          <footer className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-500 border-t border-white/5 pt-6 mt-4 mb-16 antigravity-item no-print">
+            <div>
+              <h4 className="font-bold text-slate-400 mb-1">🏥 Heart Sound BiLSTM Pipeline</h4>
+              <p>Features 25 input MFCC coefficients normalized across the temporal domain. Custom LSTM sequence gating resolves long-term dependencies to detect systolic and diastolic murmurs with high precision.</p>
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-400 mb-1">🧠 Stress Random Forest Pipeline</h4>
+              <p>Constructed utilizing standard patient physiological and lifestyle indicators (sleep, anxiety indexes). Evaluated instantly in micro-batches to coordinate lifestyle diet and cardiologist suggestions.</p>
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-400 mb-1">💤 Sleep & Longevity Analysis Engine</h4>
+              <p>Uses weighted multi-factorial biomarker risk evaluation. Combines sleep quality metrics, years of rest deficit, BMI values, and heredity records to map longevity health spans dynamically.</p>
+            </div>
+          </footer>
+
+          {/* React Bits Antigravity Control Easter Egg */}
+          <div className="fixed bottom-6 right-6 z-[999999] no-print">
+            <button 
+              onClick={() => setAntigravity(!antigravity)}
+              className={`flex items-center gap-2 px-5 py-3 rounded-full border font-bold text-xs shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 ${
+                antigravity 
+                  ? 'bg-slate-900 border-cyan-400 text-cyan-400 shadow-cyan-500/20' 
+                  : 'bg-slate-900 border-brand-red text-brand-red shadow-brand-red/20'
+              }`}
+            >
+              <span>{antigravity ? '🌎 Restore Gravity' : '🌌 Activate Antigravity'}</span>
+            </button>
+          </div>
+
+        </div>
+      );
+    }
+
+    // Bootstrap React
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+
+  <!-- High-Performance Heartbeat & ECG Cursor Trail Engine -->
+  <script>
+    (function() {
+      const canvas = document.getElementById('cursor-trail-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+      
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+      
+      const hearts = [];
+      let lastSpawn = 0;
+      
+      window.addEventListener('mousemove', (e) => {
+        const now = Date.now();
+        // Generate a heart every 250ms (prevents excessive elements)
+        if (now - lastSpawn > 250) {
+          lastSpawn = now;
+          hearts.push({
+            x: e.clientX,
+            y: e.clientY,
+            size: 14, // starting size matching tutorial aspect ratio
+            age: 0,
+            maxAge: 72 // 1.2s at 60fps
+          });
+        }
+      });
+      
+      function drawHeart(ctx, x, y, size) {
+        ctx.beginPath();
+        ctx.moveTo(x, y + size / 4);
+        ctx.quadraticCurveTo(x, y - size / 2, x - size / 2, y - size / 2);
+        ctx.quadraticCurveTo(x - size, y - size / 2, x - size, y + size / 4);
+        ctx.quadraticCurveTo(x - size, y + size * 0.75, x, y + size * 1.2);
+        ctx.quadraticCurveTo(x + size, y + size * 0.75, x + size, y + size / 4);
+        ctx.quadraticCurveTo(x + size, y - size / 2, x + size / 2, y - size / 2);
+        ctx.quadraticCurveTo(x, y - size / 2, x, y + size / 4);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      function tick() {
+        ctx.clearRect(0, 0, width, height);
+        
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(226, 85, 85, 0.4)';
+        ctx.fillStyle = '#e25555'; // Exact heart color from Divi tutorial
+        
+        for (let i = hearts.length - 1; i >= 0; i--) {
+          const h = hearts[i];
+          h.age++;
+          
+          if (h.age >= h.maxAge) {
+            hearts.splice(i, 1);
+            continue;
+          }
+          
+          const progress = h.age / h.maxAge;
+          
+          // Translate heart upwards: y offsets from 0 to -100px (equivalent to translate(-50%, -200%))
+          const floatY = progress * -100;
+          // Scale from 1.0 to 1.4
+          const scale = 1.0 + progress * 0.4;
+          // Fade out opacity from 1.0 to 0.0
+          const alpha = 1.0 - progress;
+          
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          
+          const currentSize = h.size * scale;
+          // Draw the heart translated upwards and centered horizontally
+          drawHeart(ctx, h.x, h.y + floatY, currentSize);
+          
+          ctx.restore();
+        }
+        
+        requestAnimationFrame(tick);
+      }
+      
+      tick();
+    })();
+  </script>
+</body>
+</html>
